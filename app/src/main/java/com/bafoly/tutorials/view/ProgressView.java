@@ -42,8 +42,8 @@ public class ProgressView extends View {
             // Retrieve the values from the TypedArray and store into
             // fields of this class.
             //
-            // The R.styleable.PieChart_* constants represent the index for
-            // each custom attribute in the R.styleable.PieChart array.
+            // The R.styleable.CustomProgress_* constants represent the index for
+            // each custom attribute in the R.styleable.CustomProgress array.
             insideColor = a.getColor(R.styleable.CustomProgress_colorInside,0xffff0000);
             outsideColor= a.getColor(R.styleable.CustomProgress_colorOutside,0xff0000ff);
             radius = a.getInt(R.styleable.CustomProgress_radius, 40);
@@ -58,19 +58,21 @@ public class ProgressView extends View {
     ValueAnimator animator;
 
     private void init(){
-        loaderPaint = new Paint();
-        loaderPaint.setStrokeWidth(6f);
-        loaderPaint.setStyle(Paint.Style.STROKE);
-        loaderPaint.setPathEffect(new DashPathEffect(new float[]{10, 15}, 0));
-        loaderPaint.setAntiAlias(true);
+        loaderPaint = new Paint(); // paint object will be used during drawing
+        loaderPaint.setStyle(Paint.Style.STROKE); // this will draw line
+        loaderPaint.setStrokeWidth(6f); // and the width of line is set here
+        loaderPaint.setPathEffect(new DashPathEffect(new float[]{10, 15}, 0)); // it won't be straight line, it will be dashed line
+        loaderPaint.setAntiAlias(true); // for smoother edges
+
+        // value animator will be generating values between 0 to 360 with the duration of 10 seconds
         animator = new ValueAnimator().ofFloat(0,360).setDuration(10000);
         animator.setInterpolator(new LinearInterpolator());
-        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setRepeatCount(ValueAnimator.INFINITE); // it will repeat forever
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                angle = (Float) valueAnimator.getAnimatedValue();
-                invalidate();
+            public void onAnimationUpdate(ValueAnimator valueAnimator) { // here we listen the values of animator
+                angle = (Float) valueAnimator.getAnimatedValue(); // we received a new value and we set the angle of our view
+                invalidate(); // and calling the view to be re drawn
 
             }
 
@@ -81,15 +83,24 @@ public class ProgressView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+
+        // we will draw two circles. this will be the one at the outside
+
         canvas.save();
+        // rotating the canvas with the latest position
         canvas.rotate(angle,getWidth() / 2, getHeight() / 2);
         loaderPaint.setColor(outsideColor);
+        // drawing the outer circle
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, radius, loaderPaint);
         canvas.restore();
 
+        // preparing the canvas for the second circle
         canvas.save();
+        // this will be rotated in reverse angle so we use the -angle here
         canvas.rotate(-angle, getWidth() / 2, getHeight() / 2);
+        // updating the paint object with inside color
         loaderPaint.setColor(insideColor);
+        // drawing the circle. This inner circle will have smaller radius. I randomly set it to -16 of outer circle
         canvas.drawCircle(getWidth() / 2, getHeight() / 2, radius-16, loaderPaint);
         canvas.restore();
     }
