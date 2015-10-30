@@ -45,13 +45,24 @@ public class ListViewStickyHeader extends ListView {
                     return;
 
                 LinearLayout header = (LinearLayout) listItem.findViewById(R.id.header);
-                int topMargin = 0;
-                int top = listItem.getTop();
-                int height = listItem.getHeight();
-                if (top < 0)
-                    topMargin = header.getHeight() < (top + height) ? -top : (height - header.getHeight());
-
-                header.setTranslationY(topMargin);
+                int moveY = 0;
+                int rowsTop = listItem.getTop();
+                int contentHeight = listItem.getHeight();
+                int headerHeight = header.getHeight();
+                if (rowsTop < 0){ // current row is partially out of the screen..
+                    // we are moving the header inside the view and we need to make sure
+                    // we have space left
+                    int remainingSpace = rowsTop + contentHeight;
+                    if(headerHeight<remainingSpace){ // we have place to move
+                        moveY = -rowsTop;
+                    } else { // we reached to the limits of current view. So we need to move the header out
+                        moveY = contentHeight - headerHeight;
+                    }
+                } else {
+                    // our current list row has not reached to top yet..
+                }
+                // update the Y position of header
+                header.setTranslationY(moveY);
 
             }
         });
